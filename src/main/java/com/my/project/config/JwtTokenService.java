@@ -1,8 +1,12 @@
 package com.my.project.config;
 
+import com.my.project.model.Role;
+import com.my.project.model.User;
+import com.my.project.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,6 +30,7 @@ public class JwtTokenService implements Serializable {
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
     public static final String ROLES = "ROLES";
+    @Autowired UserRepository userRepository;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -69,8 +74,16 @@ public class JwtTokenService implements Serializable {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
+        User pengguna = userRepository.findByUsername(user.getUsername());
         claims.put(ROLES, roles);
-        return generateToken(claims, user.getUsername());
+        claims.put("id", pengguna.getId());
+        claims.put("username", pengguna.getUsername());
+
+        String token = generateToken(claims, user.getUsername(), user.getPassword());
+        claims.put("access_token", token);
+        claims.put("token_type", "bearer");
+
+        return token;
     }
 
     //while creating the token -
@@ -78,11 +91,13 @@ public class JwtTokenService implements Serializable {
     //2. Sign the JWT using the HS512 algorithm and secret key.
     //3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
     //   compaction of the JWT to a URL-safe string
-    private String generateToken(Map<String, Object> claims, String subject) {
+    private String generateToken(Map<String, Object> claims, String subject, String audience) {
         final long now = System.currentTimeMillis();
         return Jwts.builder()
                 .setClaims(claims)
+                .setAudience(audience)
                 .setSubject(subject)
+                //                .setPayload()
                 .setIssuedAt(new Date(now))
                 .setExpiration(new Date(now + JWT_TOKEN_VALIDITY * 1000))
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
@@ -92,6 +107,16 @@ public class JwtTokenService implements Serializable {
     public Boolean validateToken(String token) {
         final String username = getUsernameFromToken(token);
         return username != null && !isTokenExpired(token);
+    }
+
+    private Map<String, Object> getUserInfo(User user) {
+        Map<String, Object> additionalInfo = new HashMap<>();
+        additionalInfo.put("user_id", user.getId());
+        additionalInfo.put("roles", user.getRoles().stream()
+                .map(Role::getRoleName).collect(Collectors.toList()));
+        additionalInfo.put("user_name", user.getUsername());
+        additionalInfo.put("userName", user.getUsername());
+        return additionalInfo;
     }
 
 }

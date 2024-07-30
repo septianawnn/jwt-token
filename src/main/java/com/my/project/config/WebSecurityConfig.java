@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
 
 /**
  * @author pi
@@ -53,6 +56,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
+//        CorsConfiguration corsConfigur
+//        thods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         // We don't need CSRF for this example
         httpSecurity
                 .csrf().disable()
@@ -66,7 +71,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/api/auth/login", "/api/auth/register").permitAll()
         // all other requests need to be authenticated
-//                .anyRequest().authenticated()
+                .anyRequest().authenticated()
         ;
 
         // Add a filter to validate the tokens with every request

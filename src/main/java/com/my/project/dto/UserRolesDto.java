@@ -4,17 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 /**
  * @author pi
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
-    private Long id;
-    private String username;
-    private String password;
-    private String name;
+public class UserRolesDto implements Serializable {
+    private Long userId;
     private Long roleId;
-
 }
