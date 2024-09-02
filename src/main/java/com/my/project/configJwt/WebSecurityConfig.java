@@ -1,4 +1,4 @@
-package com.my.project.config;
+package com.my.project.configJwt;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,9 +14,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-
-import java.util.Arrays;
 
 /**
  * @author pi
@@ -24,7 +21,8 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true,
-        securedEnabled = true)
+        securedEnabled = true) // ketiga anotasi diatas menandakan bahwa ini adalah konfigurasi keanaman web
+                                // dan mengaktifkan keamanan global berbasis anotasi
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -45,19 +43,22 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // fungsi ini untuk mengekripsi kata sandi
     }
 
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+        return super.authenticationManagerBean(); // fungsi ini untuk mengelola otentikasi pengguna
     }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
 //        CorsConfiguration corsConfigur
 //        thods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
+        // Mengkonfigurasi HttpSecurity untuk menonaktifkan CSRF, mengatur kebijakan sesi (stateless),
+        // menentukan URL yang tidak memerlukan otentikasi, dan menambahkan JwtRequestFilter untuk memvalidasi token pada setiap permintaan.
+
         // We don't need CSRF for this example
         httpSecurity
                 .csrf().disable()

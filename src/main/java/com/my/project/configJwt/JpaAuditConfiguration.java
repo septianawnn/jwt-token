@@ -1,4 +1,4 @@
-package com.my.project.config;
+package com.my.project.configJwt;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +14,8 @@ import java.util.Optional;
 @Configuration
 @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
 public class JpaAuditConfiguration {
+    // class ini berfungsi untuk Mengkonfigurasi audit untuk entitas JPA.
+    // Memastikan setiap perubahan pada entitas menyimpan informasi siapa yang membuat atau memodifikasi.
     @Bean
     public AuditorAware<String> auditorProvider() {
         /*

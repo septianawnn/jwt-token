@@ -35,8 +35,23 @@ public class User extends AuditEntity {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "email")
+    private String email;
+
     @Column(name = "role_id")
     private Long roleId;
+
+    @Column(name = "is_active")
+    private Boolean isActive;
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
+
+    @Column(name = "login_attempt", columnDefinition = "int4 default 0")
+    private Integer loginAttempt = 0;
+
+    @Column(name = "lock_until")
+    private LocalDateTime lockUntil;
 
     @ManyToMany(cascade = {CascadeType.MERGE})
     @JoinTable(name = "user_roles",

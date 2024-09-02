@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author pi
@@ -22,4 +24,12 @@ public class Role extends AuditEntity {
 
     @Column(name = "role_name", nullable = false)
     private String roleName;
+
+    @ManyToMany(cascade = {CascadeType.MERGE})
+    @JoinTable(name = "user_roles",
+            uniqueConstraints = {
+                    @UniqueConstraint(name = "uk_user_roles", columnNames = {"user_id", "role_id"})
+            },
+            joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    private List<User> users = new ArrayList<>();
 }

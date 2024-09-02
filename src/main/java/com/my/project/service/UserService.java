@@ -12,6 +12,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * @author pi
  */
@@ -36,9 +39,15 @@ public class UserService implements UserDetailsService {
 
     public UserDto create(UserDto dto){
         User user = mapper.toEntity(dto);
+        user.setIsActive(true);
+        user.setIsDeleted(false);
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         repository.save(user);
         return mapper.toDto(user);
+    }
+
+    public List<UserDto> getAll (){
+        return repository.findAll().stream().map(mapper::toDto).collect(Collectors.toList());
     }
 
 }

@@ -1,4 +1,4 @@
-package com.my.project.config;
+package com.my.project.configJwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
  */
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
+    // class ini merupakan filter yang dijalankan sekali per permintaan (extend 'OncePerRequestFilter')
+    // menangkap setiap permintaan HTTP, mengambil token JWT dari header, dan mengautentikasi pengguna jika token valid.
     public static final String AUTHORIZATION = "Authorization";
     public static final String BEARER = "Bearer ";
 
@@ -37,6 +39,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        // fungsi ini mengambil token dari request, memvalidasi token, dan mengatur 'SecurityContext' jika token valid.
 
         final Optional<String> jwt = getJwtFromRequest(request);
         jwt.ifPresent(token -> {
@@ -68,6 +71,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     private static Optional<String> getJwtFromRequest(HttpServletRequest request) {
+        // fungsi ini mengambil token JWT dari header request
         String bearerToken = request.getHeader(AUTHORIZATION);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER)) {
             return Optional.of(bearerToken.substring(7));

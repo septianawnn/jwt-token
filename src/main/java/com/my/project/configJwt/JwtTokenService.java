@@ -1,7 +1,8 @@
-package com.my.project.config;
+package com.my.project.configJwt;
 
 import com.my.project.model.Role;
 import com.my.project.model.User;
+import com.my.project.repository.RoleRepository;
 import com.my.project.repository.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -26,11 +27,14 @@ import java.util.stream.Collectors;
  */
 @Component
 public class JwtTokenService implements Serializable {
+    // class ini berfungsi untuk menghasilkan, mengambil informasi, dan memvalidasi token JWT.
+    // menggunakan pustaka 'io.jsonwebtoken' untuk menangani pembuatan dan parsing token jwt.
     private static final long serialVersionUID = -2550185165626007488L;
 
     public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
     public static final String ROLES = "ROLES";
     @Autowired UserRepository userRepository;
+    @Autowired RoleRepository roleRepository;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -65,7 +69,8 @@ public class JwtTokenService implements Serializable {
     }
 
     //generate token for user
-    public String generateToken(Authentication authentication) {
+    // menghasilkan token berdasarkan klaim tertentu, seperti peran pengguna dan informasi lainnya.
+    public JwtResponse generateToken(Authentication authentication) {
         final Map<String, Object> claims = new HashMap<>();
         final UserDetails user = (UserDetails) authentication.getPrincipal();
 
@@ -78,12 +83,15 @@ public class JwtTokenService implements Serializable {
         claims.put(ROLES, roles);
         claims.put("id", pengguna.getId());
         claims.put("username", pengguna.getUsername());
+        claims.put("name", pengguna.getName());
+        claims.put("roles", pengguna.getRoles().stream().map(Role::getRoleName).collect(Collectors.toList()));
 
         String token = generateToken(claims, user.getUsername(), user.getPassword());
         claims.put("access_token", token);
         claims.put("token_type", "bearer");
 
-        return token;
+        Map<String, Object> userInfo = getUserInfo(pengguna);
+        return new JwtResponse(token, "Bearer", userInfo);
     }
 
     //while creating the token -
@@ -104,18 +112,21 @@ public class JwtTokenService implements Serializable {
     }
 
     //validate token
+    // memvalidasi apakah token valid (tidak kadaluarsa dan memiliki username yang valid)
     public Boolean validateToken(String token) {
         final String username = getUsernameFromToken(token);
         return username != null && !isTokenExpired(token);
     }
 
     private Map<String, Object> getUserInfo(User user) {
+        Role role = roleRepository.findById(user.getRoleId()).orElse(null);
         Map<String, Object> additionalInfo = new HashMap<>();
         additionalInfo.put("user_id", user.getId());
-        additionalInfo.put("roles", user.getRoles().stream()
-                .map(Role::getRoleName).collect(Collectors.toList()));
+        additionalInfo.put("roles", role.getRoleName());
+        additionalInfo.put("role_id", user.getRoleId());
         additionalInfo.put("user_name", user.getUsername());
         additionalInfo.put("userName", user.getUsername());
+        additionalInfo.put("email", user.getEmail());
         return additionalInfo;
     }
 
